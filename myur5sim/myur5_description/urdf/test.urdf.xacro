@@ -1,0 +1,120 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://wiki.ros.org/xacro" name="test">
+
+
+  <!-- Add for independent usage of the person model -->
+  <link name="world"/>
+  <!-- Chair model -->
+
+  <link name="chair_base" >
+    <inertial>
+      <origin xyz="0.0 0.0 0.0" />
+      <mass value="1.0" />
+      <inertia  ixx="1.0" ixy="0.0"  ixz="0.0"  iyy="100.0"  iyz="0.0"  izz="1.0" />
+    </inertial>
+    <visual>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+      <geometry>
+        <box size="0.60 1.00 0.30"/>
+      </geometry>
+      <material name="LightGrey">
+        <color rgba="0.1 0.1 0.1 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0.0 0.0 0.0" rpy="0.0 0.0 0.0" />
+      <geometry>
+        <box size="0.60 1.00 0.30"/>
+      </geometry>
+    </collision>
+  </link>
+  <gazebo reference="chair_base">
+    <material>Gazebo/Gray</material>
+  </gazebo>
+
+  <joint name="chair_base_joint" type="fixed">
+    <parent link="world" />
+    <child link = "chair_base" />
+    <origin xyz="0.0 0.78 0.15" rpy="0.0 0.0 0.0" />
+  </joint>
+
+  <link name="pilar">
+    <inertial>
+      <origin xyz="0.0 0.0 0.0" />
+      <mass value="1.0" />
+      <inertia  ixx="1.0" ixy="0.0"  ixz="0.0"  iyy="100.0"  iyz="0.0"  izz="1.0" />
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0 "/>
+      <geometry>
+        <cylinder radius="0.05" length="0.5"/> <!-- length values changes with dimension of the body 0.145*H -->
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.05" length="0.5"/>
+      </geometry>
+    </collision>
+  </link>
+  <gazebo reference="pilar">
+    <material>Gazebo/Red</material>
+  </gazebo>
+
+  <joint name="chair_pilar_joint" type="fixed">
+    <parent link="chair_base" />
+    <child link = "pilar" />
+    <origin xyz="0.0 0.0 0.4" rpy="0.0 0.0 0.0" />
+  </joint>
+
+  <link name="arm" >
+    <inertial>
+      <origin xyz="0.0 0.0 0.0" />
+      <mass value="1.0" />
+      <inertia  ixx="1.0" ixy="0.0"  ixz="0.0"  iyy="100.0"  iyz="0.0"  izz="1.0" />
+    </inertial>
+    <visual>
+      <origin xyz="0.0 -0.2 0.025" rpy="0.0 0.0 0.0" />
+      <geometry>
+        <box size="0.05 0.4 0.05"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0.0 -0.2 0.025" rpy="0.0 0.0 0.0" />
+      <geometry>
+        <box size="0.05 0.4 0.05"/>
+      </geometry>
+    </collision>
+  </link>
+  <gazebo reference="arm">
+    <material>Gazebo/Red</material>
+  </gazebo>
+
+  <joint name="pilar_arm_joint" type="revolute">
+    <limit effort="1000.0" lower="-3.14" upper="3.14" velocity="0.2"/>
+    <!--limit effort="1000.0" lower="1.57" upper="-1.57" velocity="0.2" /-->
+    <axis xyz= "1 0 0" />
+    <parent link="pilar" />
+    <child link = "arm" />
+    <origin xyz="0.0 -0.05 0.25" rpy="0.0 0.0 0.0" />
+  </joint>
+
+  <transmission name="arm_trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="pilar_arm_joint">
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="motor1">
+      <mechanicalInterface>1</mechanicalInterface>
+    </actuator>
+  </transmission>
+
+  <gazebo>
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      <robotNamespace>simple_model</robotNamespace>
+      <!--robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType-->
+      <!--legacyModeNS>true</legacyModeNS-->
+    </plugin>
+  </gazebo>
+
+
+</robot>
