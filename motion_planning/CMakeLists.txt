@@ -164,6 +164,10 @@ add_executable(tf_listener src/tf_listener.cpp)
 add_dependencies(tf_listener ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(tf_listener ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
+add_executable(move_to_points src/move_to_points.cpp)
+add_dependencies(move_to_points ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(move_to_points ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+
 add_executable(add_body src/add_body.cpp)
 add_dependencies(add_body ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(add_body ${catkin_LIBRARIES} ${Boost_LIBRARIES})
@@ -191,6 +195,26 @@ target_link_libraries(move_surfaces ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 add_executable(trajectory_pub src/trajectory_pub.cpp)
 add_dependencies(trajectory_pub ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(trajectory_pub ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+
+
+
+add_executable(plan_storer src/plan_storer.cpp)
+add_dependencies(plan_storer ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(plan_storer ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+
+add_executable(matrix_storer src/matrix_storer.cpp)
+add_dependencies(matrix_storer ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(matrix_storer ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+
+add_executable(plan_reader src/plan_reader.cpp)
+add_dependencies(plan_reader ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(plan_reader ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+
+add_executable(matrix_reader src/matrix_reader.cpp)
+add_dependencies(matrix_reader ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(matrix_reader ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+
+
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the

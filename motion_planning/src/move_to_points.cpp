@@ -31,7 +31,7 @@ void chatterCallback(const geometry_msgs::PoseStamped::ConstPtr& goal)
     initial.position.x = goal->pose.position.x;
     initial.position.y = goal->pose.position.y;
     initial.position.z = goal->pose.position.z;
-    initial.orientation.w = 1;
+    //initial.orientation.w = 1;
     i_arrived = 1;
 
   }
@@ -40,12 +40,8 @@ void chatterCallback(const geometry_msgs::PoseStamped::ConstPtr& goal)
     desired.position.x = goal->pose.position.x;
     desired.position.y = goal->pose.position.y;
     desired.position.z = goal->pose.position.z;
-    desired.orientation.w = 1;
+    //desired.orientation.w = 1;
     g_arrived = 1;
-    cout << "des goal: " << endl;
-    cout << desired.position.x << endl;
-    cout << desired.position.y << endl;
-    cout << desired.position.z << endl;
   }
   
   
@@ -69,7 +65,7 @@ void j_cb(const std_msgs::Float64MultiArray::ConstPtr& jvalue)
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "move_iter_plan");
+  ros::init(argc, argv, "move_to_points");
 
   ros::NodeHandle node_handle;
 
@@ -80,7 +76,6 @@ int main(int argc, char** argv)
 
   ros::AsyncSpinner spinner(1);
   spinner.start();
-
 
   static const std::string PLANNING_GROUP = "manipulator";
   moveit::planning_interface::MoveGroupInterface move_group(PLANNING_GROUP);
@@ -120,74 +115,127 @@ int main(int argc, char** argv)
   std::ostream_iterator<std::string>(std::cout, ", "));
 
   moveit::planning_interface::MoveGroupInterface::Plan my_plan;
+  moveit::planning_interface::MoveGroupInterface::Plan my_plan2;
   moveit_msgs::RobotTrajectory trajectory;
 
   std::vector<double> end_joints;
-  geometry_msgs::PoseStamped ee_pose;
-  
-  int flag = 0;
 
-  ros::Rate rate(10.0);
-  while(node_handle.ok())
-  {
-    if(flag ==0){
-      move_group.setPoseTarget(desired);
 
-      bool success = (move_group.plan(my_plan) == moveit::planning_interface::MoveItErrorCode::SUCCESS);
-      ROS_INFO( "Completed the plan from home  %s", success ? "" : "FAILED");
-      if(success){
-        ROS_INFO("Visualizing plan 1 as trajectory line");
-        visual_tools.publishAxisLabeled(desired, "desired");
-        visual_tools.publishText(text_pose, "Pose Goal", rvt::WHITE, rvt::XLARGE);
+  joint_value[0] = 0.7897;
+  joint_value[1] = -2.3015;
+  joint_value[2] = 1.8849;
+  joint_value[3] = 0.2061;
+  joint_value[4] = 1.5631;
+  joint_value[5] = -0.00698132;
 
-        //std::cout << my_plan.trajectory_ << std::endl;
 
-        visual_tools.publishTrajectoryLine(my_plan.trajectory_, joint_model_group);
-        visual_tools.trigger();
-        move_group.asyncExecute(my_plan);
-      }
 
-      if(!success)
-      return 0;
+  move_group.setJointValueTarget(joint_value);
 
-      ee_pose = move_group.getCurrentPose();
-      cout << "End effector: " << endl;
-      cout << "x = " << ee_pose.pose.position.x << endl;
-      cout << "y = " << ee_pose.pose.position.y << endl;
-      cout << "z = " << ee_pose.pose.position.z << endl;
-    }
+  bool success = (move_group.plan(my_plan) == moveit::planning_interface::MoveItErrorCode::SUCCESS);
+  ROS_INFO( "Completed the plan from home  %s", success ? "" : "FAILED");
+  if(success){
+    ROS_INFO("Visualizing plan 1 as trajectory line");
+    //visual_tools.publishAxisLabeled(initial, "initial");
+    visual_tools.publishText(text_pose, "Pose Goal", rvt::WHITE, rvt::XLARGE);
 
-    else if(flag == 1){
-      move_group.setJointValueTarget(joint_value);
+    //std::cout << my_plan.trajectory_ << std::endl;
 
-      bool success = (move_group.plan(my_plan) == moveit::planning_interface::MoveItErrorCode::SUCCESS);
-      ROS_INFO( "Completed the plan from home  %s", success ? "" : "FAILED");
-      if(success){
-        ROS_INFO("Visualizing plan 1 as trajectory line");
-        visual_tools.publishAxisLabeled(initial, "initial");
-        visual_tools.publishText(text_pose, "Pose Goal", rvt::WHITE, rvt::XLARGE);
+    visual_tools.publishTrajectoryLine(my_plan.trajectory_, joint_model_group);
+    visual_tools.trigger();
+    move_group.execute(my_plan);
+  }
 
-        //std::cout << my_plan.trajectory_ << std::endl;
-
-        visual_tools.publishTrajectoryLine(my_plan.trajectory_, joint_model_group);
-        visual_tools.trigger();
-        move_group.asyncExecute(my_plan);
-      }
-
-      if(!success)
-      return 0;
+  if(!success)
+  return 0;
 
  
-      end_joints = move_group.getCurrentJointValues();
+  end_joints = move_group.getCurrentJointValues();
 
-      cout << "Current joints: " << endl;
-      cout << end_joints[0] << endl;
-      cout << end_joints[1] << endl;
-      cout << end_joints[2] << endl;
-    }
-    
-    rate.sleep();
+  cout << "Current joints: " << endl;
+  cout << end_joints[0] << endl;
+  cout << end_joints[1] << endl;
+  cout << end_joints[2] << endl;
+
+  std::vector<double> point_goal = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+
+  point_goal[0] = 1.3629;
+  point_goal[1] = 0.0130;
+  point_goal[2] = 0.7614;
+  point_goal[3] = -0.8902;
+  point_goal[4] = 1.6856;
+  point_goal[5] = 1.3589; 
+
+  move_group.setJointValueTarget(point_goal);
+
+  success = (move_group.plan(my_plan) == moveit::planning_interface::MoveItErrorCode::SUCCESS);
+  ROS_INFO( "Completed the plan from home to steering_wheel_1  %s", success ? "" : "FAILED");
+  if(success){
+    ROS_INFO("Visualizing plan 2 as trajectory line");
+    //visual_tools.publishAxisLabeled(initial, "initial");
+    visual_tools.publishText(text_pose, "steering_wheel_1", rvt::WHITE, rvt::XLARGE);
+
+    //std::cout << my_plan.trajectory_ << std::endl;
+
+    visual_tools.publishTrajectoryLine(my_plan.trajectory_, joint_model_group);
+    visual_tools.trigger();
+    move_group.execute(my_plan);
   }
+
+  if(!success)
+  return 0;
+
+  std::vector<double> new_goal = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+
+  new_goal[0] = -0.23509;
+  new_goal[1] = -0.30717;
+  new_goal[2] = 0.53372;
+  new_goal[3] = 0.4527;
+  new_goal[4] = -0.7316;
+  new_goal[5] = 1.9249; 
+
+  move_group.setJointValueTarget(new_goal);
+
+  success = (move_group.plan(my_plan2) == moveit::planning_interface::MoveItErrorCode::SUCCESS);
+  ROS_INFO( "Completed the plan from home to new_goal  %s", success ? "" : "FAILED");
+  if(success){
+    ROS_INFO("Visualizing plan 2 as trajectory line");
+    //visual_tools.publishAxisLabeled(initial, "initial");
+    visual_tools.publishText(text_pose, "plan2", rvt::WHITE, rvt::XLARGE);
+
+    //std::cout << my_plan.trajectory_ << std::endl;
+
+    visual_tools.publishTrajectoryLine(my_plan2.trajectory_, joint_model_group);
+    visual_tools.trigger();
+    move_group.execute(my_plan2);
+  }
+
+  if(!success)
+  return 0;
+
+  move_group.setJointValueTarget(point_goal);
+
+  success = (move_group.plan(my_plan) == moveit::planning_interface::MoveItErrorCode::SUCCESS);
+  ROS_INFO( "Completed the plan from home to steering_wheel_1  %s", success ? "" : "FAILED");
+  if(success){
+    ROS_INFO("Visualizing plan 2 as trajectory line");
+    //visual_tools.publishAxisLabeled(initial, "initial");
+    visual_tools.publishText(text_pose, "steering_wheel_1", rvt::WHITE, rvt::XLARGE);
+
+    //std::cout << my_plan.trajectory_ << std::endl;
+
+    visual_tools.publishTrajectoryLine(my_plan.trajectory_, joint_model_group);
+    visual_tools.trigger();
+    move_group.execute(my_plan);
+  }
+
+  if(!success)
+  return 0;
+
+  move_group.execute(my_plan2);
+
+
+
   ros::spinOnce();
   visual_tools.deleteAllMarkers();
   ros::shutdown();

@@ -1,5 +1,5 @@
 controller_list:
-  - name: arm_controller
+  - name: ur5_manipulator_controller #arm_controller for simulation?
     action_ns: "follow_joint_trajectory"
     type: FollowJointTrajectory
     joints:

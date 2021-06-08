@@ -133,10 +133,15 @@ int main(int argc, char** argv)
 
   waypoints.push_back(first_pose);
   waypoints.push_back(initial);
-  waypoints.push_back(desired);
+  //waypoints.push_back(desired);
 
   midpoint = initial;
-  /*
+  
+
+  
+  // TO GENERATE THE WAYPOINTS
+  
+
   while(midpoint != desired){
     if (midpoint.position.x > desired.position.x){
       midpoint.position.x -= 0.1;
@@ -171,17 +176,25 @@ int main(int argc, char** argv)
     visual_tools.publishAxisLabeled(waypoints[i], "pt" + std::to_string(i), rvt::SMALL);
   visual_tools.trigger();
   
-  sleep(30.0);
+  sleep(15.0);
   my_plan.trajectory_ = trajectory; 
   move_group.execute(my_plan);
-  */
-  //ros::Rate rate(10.0);
-  //while(node_handle.ok())
-  //{
+  
+
+  
+
+  
+  /*
+  // TO MOVE WITH PLAN PROJECTION
+
+  ros::Rate rate(10.0);
+  while(node_handle.ok())
+  {
     
 
     //Cartesian goal
-    
+    if(i_arrived ==1 && g_arrived == 1){
+
     move_group.setPoseTarget(initial);
     cout << "initial: " << endl;
     cout << "x = " << initial.position.x << endl;
@@ -205,7 +218,7 @@ int main(int argc, char** argv)
     return 0;
 
     midpoint = initial;
-    midpoint.position.y = 0.8;
+    midpoint.position.y = 0.5; //0.7 normally (plane)
     move_group.setPoseTarget(midpoint);
     cout << "init_mid: " << endl;
     cout << "x = " << midpoint.position.x << endl;
@@ -232,7 +245,7 @@ int main(int argc, char** argv)
 
 
     midpoint = desired;
-    midpoint.position.y = 0.5;
+    midpoint.position.y = 0.5; //0.7 normally (plane)
     move_group.setPoseTarget(midpoint);
     cout << "des_mid: " << endl;
     cout << "x = " << midpoint.position.x << endl;
@@ -251,7 +264,7 @@ int main(int argc, char** argv)
 
       visual_tools.publishTrajectoryLine(my_plan.trajectory_, joint_model_group);
       visual_tools.trigger();
-      move_group.asyncExecute(my_plan);
+      move_group.execute(my_plan);
     }
 
     if(!success)
@@ -276,10 +289,13 @@ int main(int argc, char** argv)
       visual_tools.publishTrajectoryLine(my_plan.trajectory_, joint_model_group);
       visual_tools.trigger();
       move_group.execute(my_plan);
+      i_arrived = 0;
+      g_arrived = 0;
     }
 
     if(!success)
     return 0;
+    }
 
     //move_group.asyncMove();
     
@@ -300,8 +316,14 @@ int main(int argc, char** argv)
     //cout << "z = " << ee_pose.pose.position.z << endl;
 
       
-    //rate.sleep();
-  //}
+    rate.sleep();
+    visual_tools.deleteAllMarkers();
+  }
+
+  // UNTIL HERE
+  */
+
+
     //move_group.setPoseTarget(desired);
 
     //bool success = (move_group.plan(my_plan) == moveit::planning_interface::MoveItErrorCode::SUCCESS);

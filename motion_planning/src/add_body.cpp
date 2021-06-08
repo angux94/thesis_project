@@ -1,5 +1,9 @@
 #include <iostream>
 #include <tf2/LinearMath/Transform.h>
+#include <tf2/LinearMath/Quaternion.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+
+
 #include <tf/transform_listener.h>
 #include <ros/ros.h>
 #include <moveit/move_group_interface/move_group_interface.h>
@@ -13,6 +17,7 @@
 
 #include <geometry_msgs/Pose.h>
 #include <geometric_shapes/shape_operations.h>
+
 
 using namespace std;
 
@@ -32,13 +37,74 @@ int main(int argc, char** argv)
   moveit::planning_interface::PlanningSceneInterface current_scene;
   sleep(2.0);
 
+  // Add the PLANE
+  
   moveit_msgs::CollisionObject collision_object;
   collision_object.header.frame_id = group.getPlanningFrame();
 
-  /* The id of the object is used to identify it. */
+  // The id of the object is used to identify it.
+  collision_object.id = "plane";
+
+  // Define a box to add to the world.
+  shape_msgs::SolidPrimitive plane_shape;
+  plane_shape.type = plane_shape.BOX;
+  plane_shape.dimensions.resize(3);
+  plane_shape.dimensions[0] = 2.0;
+  plane_shape.dimensions[1] = 0.02;
+  plane_shape.dimensions[2] = 1.4;
+
+  // A pose for the box (specified relative to frame_id)
+  tf2::Quaternion myQuaternion;
+
+  myQuaternion.setRPY(0.0,0.0,0.785);
+
+  myQuaternion = myQuaternion.normalize();
+  cout << myQuaternion << endl;
+
+  geometry_msgs::Pose plane_pose;
+  
+  plane_pose.position.x =  0.0;
+  plane_pose.position.y = 0.3;
+  plane_pose.position.z =  1.0;
+  plane_pose.orientation.w = 1.0;
+
+  tf2::Quaternion q_orig, q_rot, q_new;
+
+  // Get the original orientation of 'commanded_pose'
+  tf2::convert(plane_pose.orientation , q_orig);
+
+  double r=0.0, p=0, y=-0.785;  // Rotate the previous pose by 180* about X
+  q_rot.setRPY(r, p, y);
+
+  q_new = q_rot*q_orig;  // Calculate the new orientation
+  q_new.normalize();
+
+  // Stuff the new rotation back into the pose. This requires conversion into a msg type
+  tf2::convert(q_new, plane_pose.orientation);
+
+
+  collision_object.primitives.push_back(plane_shape);
+  collision_object.primitive_poses.push_back(plane_pose);
+  collision_object.operation = collision_object.ADD;
+
+  std::vector<moveit_msgs::CollisionObject> collision_objects;  
+  collision_objects.push_back(collision_object);  
+
+  // Now, let's add the collision object into the world
+  ROS_INFO("Add an object into the world");  
+  current_scene.addCollisionObjects(collision_objects);
+  sleep(2.0);
+  
+
+
+  /*
+  //moveit_msgs::CollisionObject collision_object;
+  collision_object.header.frame_id = group.getPlanningFrame();
+
+  // The id of the object is used to identify it.
   collision_object.id = "chair_base";
 
-  /* Define a box to add to the world. */
+  // Define a box to add to the world.
   shape_msgs::SolidPrimitive primitive;
   primitive.type = primitive.BOX;
   primitive.dimensions.resize(3);
@@ -46,7 +112,7 @@ int main(int argc, char** argv)
   primitive.dimensions[1] = 1.00;
   primitive.dimensions[2] = 0.30;
 
-  /* A pose for the box (specified relative to frame_id) */
+  // A pose for the box (specified relative to frame_id)
   geometry_msgs::Pose box_pose;
   box_pose.orientation.w = 1.0;
   box_pose.position.x =  0.0;
@@ -57,15 +123,16 @@ int main(int argc, char** argv)
   collision_object.primitive_poses.push_back(box_pose);
   collision_object.operation = collision_object.ADD;
 
-  std::vector<moveit_msgs::CollisionObject> collision_objects;  
+  //std::vector<moveit_msgs::CollisionObject> collision_objects;  
   collision_objects.push_back(collision_object);  
 
   // Now, let's add the collision object into the world
   ROS_INFO("Add an object into the world");  
-  //current_scene.addCollisionObjects(collision_objects);
+  current_scene.addCollisionObjects(collision_objects);
   sleep(2.0);
 
 
+  
   // MESH obstacle  
   moveit_msgs::CollisionObject co;
   co.header.frame_id = group.getPlanningFrame();
@@ -78,6 +145,7 @@ int main(int argc, char** argv)
   //package://myur5_description/meshes/chair.stl
   shapes::Mesh* m = shapes::createMeshFromResource("package://ur_description/meshes/ur5/collision/chair.stl"); 
   ROS_INFO("Chair mesh loaded");
+  sleep(2.0);
 
   shape_msgs::Mesh mesh;
   shapes::ShapeMsg mesh_msg;  
@@ -102,9 +170,10 @@ int main(int argc, char** argv)
   
   collision_objects.push_back(co);
   ROS_INFO("Chair added into the world");
+  sleep(5.0);
   current_scene.addCollisionObjects(collision_objects);
-  sleep(2.0);
-
+  sleep(5.0);
+  */
 
   ros::shutdown();
   return 0;

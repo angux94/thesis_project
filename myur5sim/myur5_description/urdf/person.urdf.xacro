@@ -49,7 +49,7 @@
   <joint name="chair_base_joint" type="fixed">
     <parent link="world" />
     <child link = "chair_base" />
-    <origin xyz="0.0 0.78 0.15" rpy="0.0 0.0 0.0" />
+    <origin xyz="0.78 0.78 0.15" rpy="0.0 0.0 0.785" />
   </joint>
 
 <!--
